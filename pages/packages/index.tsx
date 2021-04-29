@@ -3,6 +3,8 @@ import Typography from "@material-ui/core/Typography";
 import React from "react";
 import {Table, TableBody, TableRow, TableCell, TableHead, Container} from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
+import {useSelector, useDispatch} from "react-redux"
+import { getPackages } from '../../redux/actions/package';
 
 const useStyles = makeStyles((theme) => ({
     seeMore: {
@@ -10,13 +12,19 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export const getStaticProps = async () => {
+// Llamado a la acción, POR CORREGIR
+//const dispatch = useDispatch()
+//const state = useSelector(state => state)
 
+export const getStaticProps = async () => {
+    // ERROR EN CODIGO AQUI
+    //dispatch(getPackages())
     const res = await fetch('http://localhost:8080/packages');
     const data = await res.json();
 
     return {
-        props: {packages: data}
+        data
+        //state
     }
 
 }
