@@ -31,6 +31,7 @@ const Navbar = () => {
                         Kurztrip
                     </Typography>
                     <Button color="inherit" href="/packages">Packages</Button>
+                    <Button color="inherit" href="/trucks">Trucks</Button>
                     <Button color="inherit" href="/packages/new">New package</Button>
                     <Button color="inherit" href="/login">Login</Button>
                 </Toolbar>

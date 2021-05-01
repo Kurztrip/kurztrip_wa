@@ -3,11 +3,13 @@ import { HYDRATE, createWrapper } from 'next-redux-wrapper'
 import thunkMiddleware from 'redux-thunk'
 import { userReducer} from './reducers/user'
 import { packageReducer} from './reducers/package'
+import { truckReducer } from './reducers/trucks'
 // import tick from './tick/reducer'
 
 const reducers = combineReducers({
     packages: packageReducer,
-    userReducer: userReducer
+    userReducer: userReducer,
+    trucks: truckReducer
 })
 
 //export const store = createStore(userReducer)
