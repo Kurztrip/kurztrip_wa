@@ -12,25 +12,15 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-// Llamado a la acción, POR CORREGIR
-//const dispatch = useDispatch()
-//const state = useSelector(state => state)
-
-export const getStaticProps = async () => {
-    // ERROR EN CODIGO AQUI
-    //dispatch(getPackages())
-    const res = await fetch('http://localhost:8080/packages');
-    const data = await res.json();
-
-    return {
-        data
-        //state
-    }
-
-}
-
-export default function Packages ({ packages }) {
+export default function Packages () {
     const classes = useStyles();
+
+    const dispatch = useDispatch()
+    dispatch(getPackages())
+    
+    const state = useSelector(state => state)
+    // de state tomar packages
+    console.log(state)
 
     return (
         <Container>
@@ -46,7 +36,7 @@ export default function Packages ({ packages }) {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {packages.map(pack => (
+                    {state.map(pack => (
                         <TableRow key={pack.id}>
                             <TableCell>
                                 <Link href={'/packages/'+ pack.id} key={pack.id}>{'Package ' + pack.id}</Link>

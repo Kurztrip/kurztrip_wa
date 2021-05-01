@@ -1,5 +1,6 @@
 export const useActionsTypes = {
     getPackages: 'getPackages',
+    getPackage: 'getPackage',
 }
   
 export const getPackages = () => {
@@ -7,4 +8,13 @@ export const getPackages = () => {
         type: useActionsTypes.getPackages,
     })
 }
+
+export const getPackage = (id) => {
+    return ({
+        type: useActionsTypes.getPackage,
+        id
+    })
+}
+
+
   
