@@ -30,10 +30,9 @@ const Navbar = () => {
                     <Typography variant="h6" style={{flexGrow: 1}}>
                         Kurztrip
                     </Typography>
-                    <Button color="inherit" href="/packages">Packages</Button>
-                    <Button color="inherit" href="/trucks">Trucks</Button>
-                    <Button color="inherit" href="/packages/new">New package</Button>
-                    <Button color="inherit" href="/login">Login</Button>
+                    <Button color="inherit" href="/packages">Paquetes</Button>
+                    <Button color="inherit" href="/trucks">Camiones</Button>
+                    <Button color="inherit" href="/login">Iniciar sesión</Button>
                 </Toolbar>
             </AppBar>
         </div>
