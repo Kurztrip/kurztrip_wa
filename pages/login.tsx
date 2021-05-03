@@ -11,8 +11,7 @@ import {useState} from "react"
 import {editUser} from "../redux/actions/user"
 import {useSelector, useDispatch} from "react-redux"
 import { ApolloClient,InMemoryCache,ApolloProvider,useQuery,useMutation,gql } from '@apollo/client';
-
-
+import {connect} from "react-redux"
 
 
 
@@ -34,35 +33,27 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const LOGIN_USER = gql`
-  mutation{
-        Login(login:{
-            email: "laurenza4@gmail.com"
-            password: "123123123"
-        }){
+  mutation Login($email: String!, $password: String!){
+        Login(login: {
+            email: $email, password: $password
+        }
+        ){
             access_token
         }
     }
 `;
 
-const UPDATE_TODO = gql`
-  mutation UpdateTodo($id: String!, $type: String!) {
-    updateTodo(id: $id, type: $type) {
-      id
-      type
-    }
-  }
-`;
 
-export default function SignIn() {
+const SignIn = ({editUser}) => {
     
     const classes = useStyles();
 
     const [email, setEmail] = useState<string>("")
     const [password, setPassword] = useState<string>("")
     const [
-        updateTodo,
+        login,
         { loading: mutationLoading, error: mutationError }
-      ] = useMutation(UPDATE_TODO);
+      ] = useMutation(LOGIN_USER);
 
 
     const dispatch = useDispatch()
@@ -72,11 +63,17 @@ export default function SignIn() {
         e.preventDefault()
 
         console.log({email, password})
-       
+        const res = login({ variables: { "email":email, "password":password } });
+        res.then(function(data){
+            console.log(data.data.Login.access_token)
+            editUser(data.data.Login.access_token)
+        }).catch(function(reason){
+            console.log ("error")
+        })
+        console.log (res.catch)
         dispatch(editUser({password, email}))
     }
    
-
     return (
         <Container component="main" maxWidth="xs">
             <CssBaseline />
@@ -130,3 +127,8 @@ export default function SignIn() {
         </Container>
     );
 }
+
+const mapDispatchToProps = {
+    editUser,
+}
+export default connect(null, mapDispatchToProps)(SignIn)
