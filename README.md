@@ -3,6 +3,9 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 ## Getting Started
 Install previously
 npm install next react react-dom
+npm install @apollo/react-hooks
+
+npm install @apollo/client graphql
 remeber nom i
 First, run the development server:
 
