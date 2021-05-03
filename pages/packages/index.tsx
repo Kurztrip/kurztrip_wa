@@ -86,6 +86,31 @@ const ADD_PACKAGE = gql `
     }
 `;
 
+const EDIT_PACKAGE = gql `
+    mutation UpdatePackage($id: Int!, $address: String, $weight: Float, $volume: Float, $latitude: Float, $longitude: Float, $storeId: Int, $receiver: String, $idReceiver: String) {
+        updatePackage (id:$id, update_package: {
+            address: $address
+            weight: $weight
+            volume: $volume
+            latitude: $latitude
+            longitude: $longitude
+            storeId: $storeId
+            receiver: $receiver
+            idReceiver: $idReceiver
+        }) {
+            id
+            address
+            weight
+            volume
+            latitude
+            longitude
+            storeId
+            receiver
+            idReceiver
+        }
+    }
+`;
+
 const DELETE_PACKAGE = gql `
     mutation DeletePackage($id: Int!) {
         deletePackage (id: $id)
@@ -121,17 +146,47 @@ export default function packs ({res}) {
 
     const m3 = '\u00B3';
 
-    const [open, setOpen] = React.useState(false);
+    const [openAdd, setOpenAdd] = React.useState(false);
 
-    const handleClickOpen = () => {
-        setOpen(true);
+    const [openEdit, setOpenEdit] = React.useState(false);
+
+    const [formInfo, setformInfo] = React.useState({
+        id: 0,
+        address: 'a',
+        weight: 0,
+        volume: 0,
+        latitude: 0,
+        longitude: 0,
+        storeId: 0,
+        receiver: 'a',
+        idReceiver: 'a',
+    });
+
+    const handleClickOpenAdd = () => {
+        setOpenAdd(true);
     };
 
-    const handleClose = () => {
-        setOpen(false);
+    const handleCloseAdd = () => {
+        setOpenAdd(false);
+    };
+
+    const handleClickOpenEdit = async (event,pack) => {
+        event.stopPropagation();
+
+        setformInfo(pack);
+
+        setOpenEdit(true);
+    };
+
+    const handleCloseEdit = () => {
+        setOpenEdit(false);
     };
 
     const [addPackage] = useMutation(ADD_PACKAGE, {
+        client: client,
+    })
+
+    const [updatePackage] = useMutation(EDIT_PACKAGE, {
         client: client,
     })
 
@@ -156,8 +211,22 @@ export default function packs ({res}) {
         });
     }
 
-    const editPackage = async event => {
-        event.stopPropagation()
+    const editPackage = async (event,id) => {
+        event.preventDefault()
+
+        const res = await updatePackage({
+            variables: {
+                id: id,
+                address: event.target.address.value,
+                weight: parseFloat(event.target.weight.value),
+                volume: parseFloat(event.target.volume.value),
+                latitude: parseFloat(event.target.latitude.value),
+                longitude: parseFloat(event.target.longitude.value),
+                storeId: parseInt(event.target.storeId.value),
+                receiver: event.target.receiver.value,
+                idReceiver: event.target.idReceiver.value
+            }
+        });
     }
 
     const deletePackage = async (event, id) => {
@@ -188,13 +257,13 @@ export default function packs ({res}) {
                                 spacing={2}
                             >
                                 <Typography className={classes.addPackage} style={{fontWeight: 800, flexGrow: 10}}>Añadir paquete </Typography>
-                                <Button onClick={handleClickOpen} style={{flexGrow: 1}}>
+                                <Button onClick={handleClickOpenAdd} style={{flexGrow: 1}}>
                                     <AddCircle/>
                                 </Button>
                             </Grid>
                         </Box>
-                        <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                            <DialogTitle id="form-dialog-title">Añadir paquete</DialogTitle>
+                        <Dialog open={openAdd} onClose={handleCloseAdd} aria-labelledby="add">
+                            <DialogTitle id="addPackage">Añadir paquete</DialogTitle>
                             <DialogContent>
                                 <DialogContentText>
                                     Datos del nuevo paquete
@@ -289,7 +358,7 @@ export default function packs ({res}) {
                                         type="text"
                                     />
                                     <div className={classes.buttons}>
-                                        <Button onClick={handleClose} color="primary">
+                                        <Button onClick={handleCloseAdd} color="primary">
                                             Cancelar
                                         </Button>
                                         <Button
@@ -297,7 +366,7 @@ export default function packs ({res}) {
                                             variant="contained"
                                             color="primary"
                                             className={classes.submit}
-                                            onClick={handleClose}
+                                            onClick={handleCloseAdd}
                                         >
                                             Guardar
                                         </Button>
@@ -310,49 +379,173 @@ export default function packs ({res}) {
             </div>
             <div className={classes.root}>
                 {res.map(pack => (
-                    <Accordion key={pack.id}>
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                            aria-controls={pack.id}
-                            id={pack.id}
-                        >
-                            <Container>
-                                <Box height='6vh'>
-                                    <Grid
-                                        className={classes.grid}
-                                        container
-                                        direction='row'
-                                        justify="flex-end"
-                                        alignItems="center"
-                                        spacing={2}
-                                    >
-                                        <div style={{flexGrow: 19}}>
-                                            <Typography className={classes.secondaryHeading}>En curso</Typography>
-                                            <Typography className={classes.heading}>Paquete #{pack.id}</Typography>
-                                        </div>
-                                        <Button onClick={ editPackage } style={{flexGrow: 1}}>
-                                            <EditIcon/>
-                                        </Button>
-                                        <Button onClick={ e => deletePackage(e,pack.id) } style={{flexGrow: 1}}>
-                                            <DeleteIcon/>
-                                        </Button>
-                                    </Grid>
-                                </Box>
-                            </Container>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            <div>
-                                <Typography> Dirección: {pack.address} </Typography>
-                                <Typography> Peso: {pack.weight} Kg </Typography>
-                                <Typography> Volumen: {pack.volume} m{m3} </Typography>
-                                <Typography> Coordenadas de destino: [ {pack.latitude} , {pack.longitude} ] </Typography>
-                                <Typography> Centro de distribución: {pack.storeId} </Typography>
-                                <Typography> Destinatario: {pack.receiver}</Typography>
-                                <Typography> ID Destinatario: {pack.idReceiver}</Typography>
-                            </div>
-                        </AccordionDetails>
-                    </Accordion>
+                    <div key={pack.id}>
+                        <Accordion key={pack.id}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls={pack.id}
+                                id={pack.id}
+                            >
+                                <Container>
+                                    <Box height='6vh'>
+                                        <Grid
+                                            className={classes.grid}
+                                            container
+                                            direction='row'
+                                            justify="flex-end"
+                                            alignItems="center"
+                                            spacing={2}
+                                        >
+                                            <div style={{flexGrow: 19}}>
+                                                <Typography className={classes.secondaryHeading}>En curso</Typography>
+                                                <Typography className={classes.heading}>Paquete #{pack.id}</Typography>
+                                            </div>
+                                            <Button onClick={ e => handleClickOpenEdit(e, pack) } style={{flexGrow: 1}}>
+                                                <EditIcon/>
+                                            </Button>
+                                            <Button onClick={ e => deletePackage(e, pack.id) } style={{flexGrow: 1}}>
+                                                <DeleteIcon/>
+                                            </Button>
+                                        </Grid>
+                                    </Box>
+                                </Container>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <div>
+                                    <Typography> Dirección: {pack.address} </Typography>
+                                    <Typography> Peso: {pack.weight} Kg </Typography>
+                                    <Typography> Volumen: {pack.volume} m{m3} </Typography>
+                                    <Typography> Coordenadas de destino: [ {pack.latitude} , {pack.longitude} ] </Typography>
+                                    <Typography> Centro de distribución: {pack.storeId} </Typography>
+                                    <Typography> Destinatario: {pack.receiver}</Typography>
+                                    <Typography> ID Destinatario: {pack.idReceiver}</Typography>
+                                </div>
+                            </AccordionDetails>
+                        </Accordion>
+                    </div>
                 ))}
+            </div>
+            <div>
+                <Dialog open={openEdit} onClose={handleCloseEdit} aria-labelledby={"edit"} key={"dialog"}>
+                    <DialogTitle id={"editPackage"}>Editar paquete</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Datos del paquete #{formInfo.id}
+                        </DialogContentText>
+                        <form className={classes.form} noValidate onSubmit={ e => editPackage(e,formInfo.id) }>
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="address"
+                                label="Dirección"
+                                name="address"
+                                autoComplete="address"
+                                autoFocus
+                                defaultValue={formInfo.address}
+                            />
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                name="weight"
+                                label="Peso"
+                                id="weight"
+                                autoComplete="weight"
+                                type="number"
+                                defaultValue={formInfo.weight}
+                            />
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                name="volume"
+                                label="Volumen"
+                                id="volume"
+                                autoComplete="volume"
+                                type="number"
+                                defaultValue={formInfo.volume}
+                            />
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                name="latitude"
+                                label="Latitúd"
+                                id="latitude"
+                                autoComplete="latitude"
+                                type="number"
+                                defaultValue={formInfo.latitude}
+                            />
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                name="longitude"
+                                label="Longitúd"
+                                id="longitude"
+                                autoComplete="longitude"
+                                type="number"
+                                defaultValue={formInfo.longitude}
+                            />
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                name="storeId"
+                                label="Centro de distribución"
+                                id="storeId"
+                                autoComplete="storeId"
+                                type="number"
+                                defaultValue={formInfo.storeId}
+                            />
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                name="receiver"
+                                label="Destinatario"
+                                id="receiver"
+                                autoComplete="receiver"
+                                type="text"
+                                defaultValue={formInfo.receiver}
+                            />
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                name="idReceiver"
+                                label="ID Destinatario"
+                                id="idReceiver"
+                                autoComplete="idReceiver"
+                                type="text"
+                                defaultValue={formInfo.idReceiver}
+                            />
+                            <div className={classes.buttons}>
+                                <Button onClick={handleCloseEdit} color="primary">
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    color="primary"
+                                    className={classes.submit}
+                                    onClick={handleCloseEdit}
+                                >
+                                    Guardar
+                                </Button>
+                            </div>
+                        </form>
+                    </DialogContent>
+                </Dialog>
             </div>
         </Container>
     )

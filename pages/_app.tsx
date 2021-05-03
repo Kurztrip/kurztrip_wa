@@ -15,10 +15,10 @@ function MyApp({ Component, pageProps }:AppProps) {
   return (
     <ApolloProvider client={client}>
         <Provider store={store} >
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-      </Provider>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </Provider>
     </ApolloProvider>
   )
 }
