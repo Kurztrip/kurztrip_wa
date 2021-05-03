@@ -1,23 +1,18 @@
 import Typography from "@material-ui/core/Typography";
 import React from "react";
-import {
-    Container,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    TextField
-} from "@material-ui/core";
-import { makeStyles } from '@material-ui/core/styles';
-import {useDispatch} from "react-redux"
+import {Container, Dialog, DialogContent, DialogContentText, DialogTitle, TextField} from "@material-ui/core";
+import {makeStyles} from '@material-ui/core/styles';
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
-import {getPackages} from "../../redux/actions/package";
 import Button from "@material-ui/core/Button";
 import AddCircle from '@material-ui/icons/AddCircle';
+import Box from "@material-ui/core/Box";
+import Grid from "@material-ui/core/Grid";
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import {ApolloClient, gql, InMemoryCache, useMutation} from '@apollo/client';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -35,12 +30,6 @@ const useStyles = makeStyles((theme) => ({
     title: {
         border: 10,
     },
-    paper: {
-        marginTop: theme.spacing(8),
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'left',
-    },
     form: {
         width: '100%', // Fix IE 11 issue.
         marginTop: theme.spacing(1),
@@ -49,22 +38,41 @@ const useStyles = makeStyles((theme) => ({
         margin: theme.spacing(3, 0, 2),
         background: '#6200EE',
     },
-    addButton: {
-        align: 'right',
+    addBar: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        height: '100%',
     },
     buttons: {
         display: 'flex',
         justifyContent: 'flex-end',
     },
+    grid: {
+        height: "100%"
+    },
+    addPackage: {
+        ...theme.typography.button,
+        padding: theme.spacing(4),
+    },
 }));
 
-export const getStaticProps = async () => {
-    const res = await fetch('http://localhost:4000', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({query: `{ getPackages{
+const client = new ApolloClient({
+    uri: 'http://localhost:4000',
+    cache: new InMemoryCache()
+});
+
+const ADD_PACKAGE = gql `
+    mutation CreatePackage($address: String, $weight: Float, $volume: Float, $latitude: Float, $longitude: Float, $storeId: Int, $receiver: String, $idReceiver: String) {
+        createPackage (new_package: {
+            address: $address
+            weight: $weight
+            volume: $volume
+            latitude: $latitude
+            longitude: $longitude
+            storeId: $storeId
+            receiver: $receiver
+            idReceiver: $idReceiver
+        }) {
             id
             address
             weight
@@ -74,23 +82,44 @@ export const getStaticProps = async () => {
             storeId
             receiver
             idReceiver
-        } }`})
-    })
-    const obj = await res.json();
-    const data = obj.data.getPackages;
+        }
+    }
+`;
+
+const DELETE_PACKAGE = gql `
+    mutation DeletePackage($id: Int!) {
+        deletePackage (id: $id)
+    }
+`;
+
+export const getStaticProps = async () => {
+    const {data} = await client.query({
+        query: gql `
+        query {
+            getPackages{
+                id
+                address
+                weight
+                volume
+                latitude
+                longitude
+                storeId
+                receiver
+                idReceiver
+            }
+        }
+        `
+    });
 
     return {
-        props: {data}
+        props: {res: data.getPackages}
     }
 }
 
-export default function packs ({data}) {
+export default function packs ({res}) {
     const classes = useStyles();
 
     const m3 = '\u00B3';
-
-    const dispatch = useDispatch()
-    dispatch(getPackages())
 
     const [open, setOpen] = React.useState(false);
 
@@ -102,41 +131,68 @@ export default function packs ({data}) {
         setOpen(false);
     };
 
+    const [addPackage] = useMutation(ADD_PACKAGE, {
+        client: client,
+    })
+
+    const [removePackage] = useMutation(DELETE_PACKAGE, {
+        client: client,
+    })
+
     const newPackage = async event => {
         event.preventDefault()
 
-        const res = await fetch(
-            'http://localhost:8080/packages/add',
-            {
-                body: JSON.stringify({
-                    address: event.target.address.value,
-                    weight: event.target.weight.value,
-                    volume: event.target.volume.value
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                method: 'POST'
+        const res = await addPackage({
+            variables: {
+                address: event.target.address.value,
+                weight: parseFloat(event.target.weight.value),
+                volume: parseFloat(event.target.volume.value),
+                latitude: parseFloat(event.target.latitude.value),
+                longitude: parseFloat(event.target.longitude.value),
+                storeId: parseInt(event.target.storeId.value),
+                receiver: event.target.receiver.value,
+                idReceiver: event.target.idReceiver.value
             }
-        )
+        });
+    }
 
-        const result = await res.json()
+    const editPackage = async event => {
+        event.stopPropagation()
+    }
+
+    const deletePackage = async (event, id) => {
+        event.stopPropagation()
+
+        const res = await removePackage({
+            variables: {
+                id: parseInt(id)
+            }
+        });
     }
 
     return (
         <Container>
             <Typography component='h3' className="title" variant='h5'>
-                Camiones registrados
+                Paquetes registrados
             </Typography>
             <div className={classes.root}>
                 <Accordion key="addPackage">
                     <div>
-                        <div>
-                            <Typography className={classes.heading}>Añadir Paquete </Typography>
-                            <Button color="primary" onClick={handleClickOpen}>
-                                <AddCircle/>
-                            </Button>
-                        </div>
+                        <Box height='10.5vh' mr={6}>
+                            <Grid
+                                className={classes.grid}
+                                container
+                                direction='row'
+                                justify="flex-end"
+                                alignItems="center"
+                                spacing={2}
+                            >
+                                <Typography className={classes.addPackage} style={{fontWeight: 800, flexGrow: 10}}>Añadir paquete </Typography>
+                                <Button onClick={handleClickOpen} style={{flexGrow: 1}}>
+                                    <AddCircle/>
+                                </Button>
+                            </Grid>
+                        </Box>
                         <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                             <DialogTitle id="form-dialog-title">Añadir paquete</DialogTitle>
                             <DialogContent>
@@ -150,7 +206,7 @@ export default function packs ({data}) {
                                         required
                                         fullWidth
                                         id="address"
-                                        label="Address"
+                                        label="Dirección"
                                         name="address"
                                         autoComplete="address"
                                         autoFocus
@@ -161,7 +217,7 @@ export default function packs ({data}) {
                                         required
                                         fullWidth
                                         name="weight"
-                                        label="Weight"
+                                        label="Peso"
                                         id="weight"
                                         autoComplete="weight"
                                         type="number"
@@ -172,10 +228,65 @@ export default function packs ({data}) {
                                         required
                                         fullWidth
                                         name="volume"
-                                        label="Volume"
+                                        label="Volumen"
                                         id="volume"
                                         autoComplete="volume"
                                         type="number"
+                                    />
+                                    <TextField
+                                        variant="outlined"
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        name="latitude"
+                                        label="Latitúd"
+                                        id="latitude"
+                                        autoComplete="latitude"
+                                        type="number"
+                                    />
+                                    <TextField
+                                        variant="outlined"
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        name="longitude"
+                                        label="Longitúd"
+                                        id="longitude"
+                                        autoComplete="longitude"
+                                        type="number"
+                                    />
+                                    <TextField
+                                        variant="outlined"
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        name="storeId"
+                                        label="Centro de distribución"
+                                        id="storeId"
+                                        autoComplete="storeId"
+                                        type="number"
+                                    />
+                                    <TextField
+                                        variant="outlined"
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        name="receiver"
+                                        label="Destinatario"
+                                        id="receiver"
+                                        autoComplete="receiver"
+                                        type="text"
+                                    />
+                                    <TextField
+                                        variant="outlined"
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        name="idReceiver"
+                                        label="ID Destinatario"
+                                        id="idReceiver"
+                                        autoComplete="idReceiver"
+                                        type="text"
                                     />
                                     <div className={classes.buttons}>
                                         <Button onClick={handleClose} color="primary">
@@ -198,17 +309,36 @@ export default function packs ({data}) {
                 </Accordion>
             </div>
             <div className={classes.root}>
-                {data.map(pack => (
+                {res.map(pack => (
                     <Accordion key={pack.id}>
                         <AccordionSummary
                             expandIcon={<ExpandMoreIcon />}
                             aria-controls={pack.id}
                             id={pack.id}
                         >
-                            <div>
-                                <Typography className={classes.secondaryHeading}>ID: {pack.id}</Typography>
-                                <Typography className={classes.heading}>Paquete #{pack.id}</Typography>
-                            </div>
+                            <Container>
+                                <Box height='6vh'>
+                                    <Grid
+                                        className={classes.grid}
+                                        container
+                                        direction='row'
+                                        justify="flex-end"
+                                        alignItems="center"
+                                        spacing={2}
+                                    >
+                                        <div style={{flexGrow: 19}}>
+                                            <Typography className={classes.secondaryHeading}>En curso</Typography>
+                                            <Typography className={classes.heading}>Paquete #{pack.id}</Typography>
+                                        </div>
+                                        <Button onClick={ editPackage } style={{flexGrow: 1}}>
+                                            <EditIcon/>
+                                        </Button>
+                                        <Button onClick={ e => deletePackage(e,pack.id) } style={{flexGrow: 1}}>
+                                            <DeleteIcon/>
+                                        </Button>
+                                    </Grid>
+                                </Box>
+                            </Container>
                         </AccordionSummary>
                         <AccordionDetails>
                             <div>
