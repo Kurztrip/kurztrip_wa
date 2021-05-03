@@ -10,6 +10,10 @@ import Container from '@material-ui/core/Container';
 import {useState} from "react"
 import {editUser} from "../redux/actions/user"
 import {useSelector, useDispatch} from "react-redux"
+import { ApolloClient,InMemoryCache,ApolloProvider,useQuery,useMutation,gql } from '@apollo/client';
+
+
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -29,20 +33,49 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+export const LOGIN_USER = gql`
+  mutation{
+        Login(login:{
+            email: "laurenza4@gmail.com"
+            password: "123123123"
+        }){
+            access_token
+        }
+    }
+`;
+
+const UPDATE_TODO = gql`
+  mutation UpdateTodo($id: String!, $type: String!) {
+    updateTodo(id: $id, type: $type) {
+      id
+      type
+    }
+  }
+`;
+
 export default function SignIn() {
+    
     const classes = useStyles();
 
     const [email, setEmail] = useState<string>("")
     const [password, setPassword] = useState<string>("")
+    const [
+        updateTodo,
+        { loading: mutationLoading, error: mutationError }
+      ] = useMutation(UPDATE_TODO);
+
 
     const dispatch = useDispatch()
     const state = useSelector(state => state)
 
     const handleSubmit = (e) => {
         e.preventDefault()
+
         console.log({email, password})
+       
         dispatch(editUser({password, email}))
     }
+   
 
     return (
         <Container component="main" maxWidth="xs">
