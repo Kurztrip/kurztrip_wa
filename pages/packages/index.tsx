@@ -10,6 +10,8 @@ import Button from "@material-ui/core/Button";
 import AddCircle from '@material-ui/icons/AddCircle';
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import {ApolloClient, gql, InMemoryCache, useMutation} from '@apollo/client';
 
 const useStyles = makeStyles((theme) => ({
@@ -50,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
     },
     addPackage: {
         ...theme.typography.button,
-        padding: theme.spacing(2),
+        padding: theme.spacing(4),
     },
 }));
 
@@ -81,6 +83,12 @@ const ADD_PACKAGE = gql `
             receiver
             idReceiver
         }
+    }
+`;
+
+const DELETE_PACKAGE = gql `
+    mutation DeletePackage($id: Int!) {
+        deletePackage (id: $id)
     }
 `;
 
@@ -127,6 +135,10 @@ export default function packs ({res}) {
         client: client,
     })
 
+    const [removePackage] = useMutation(DELETE_PACKAGE, {
+        client: client,
+    })
+
     const newPackage = async event => {
         event.preventDefault()
 
@@ -144,6 +156,20 @@ export default function packs ({res}) {
         });
     }
 
+    const editPackage = async event => {
+        event.stopPropagation()
+    }
+
+    const deletePackage = async (event, id) => {
+        event.stopPropagation()
+
+        const res = await removePackage({
+            variables: {
+                id: parseInt(id)
+            }
+        });
+    }
+
     return (
         <Container>
             <Typography component='h3' className="title" variant='h5'>
@@ -152,7 +178,7 @@ export default function packs ({res}) {
             <div className={classes.root}>
                 <Accordion key="addPackage">
                     <div>
-                        <Box height='10vh' mr={4}>
+                        <Box height='10.5vh' mr={6}>
                             <Grid
                                 className={classes.grid}
                                 container
@@ -161,8 +187,8 @@ export default function packs ({res}) {
                                 alignItems="center"
                                 spacing={2}
                             >
-                                <Typography className={classes.addPackage} style={{fontWeight: 800, flexGrow: 14}}>Añadir paquete </Typography>
-                                <Button variant="contained" color="primary" onClick={handleClickOpen} style={{flexGrow: 1}}>
+                                <Typography className={classes.addPackage} style={{fontWeight: 800, flexGrow: 10}}>Añadir paquete </Typography>
+                                <Button onClick={handleClickOpen} style={{flexGrow: 1}}>
                                     <AddCircle/>
                                 </Button>
                             </Grid>
@@ -290,10 +316,29 @@ export default function packs ({res}) {
                             aria-controls={pack.id}
                             id={pack.id}
                         >
-                            <div>
-                                <Typography className={classes.secondaryHeading}>En curso</Typography>
-                                <Typography className={classes.heading}>Paquete #{pack.id}</Typography>
-                            </div>
+                            <Container>
+                                <Box height='6vh'>
+                                    <Grid
+                                        className={classes.grid}
+                                        container
+                                        direction='row'
+                                        justify="flex-end"
+                                        alignItems="center"
+                                        spacing={2}
+                                    >
+                                        <div style={{flexGrow: 19}}>
+                                            <Typography className={classes.secondaryHeading}>En curso</Typography>
+                                            <Typography className={classes.heading}>Paquete #{pack.id}</Typography>
+                                        </div>
+                                        <Button onClick={ editPackage } style={{flexGrow: 1}}>
+                                            <EditIcon/>
+                                        </Button>
+                                        <Button onClick={ e => deletePackage(e,pack.id) } style={{flexGrow: 1}}>
+                                            <DeleteIcon/>
+                                        </Button>
+                                    </Grid>
+                                </Box>
+                            </Container>
                         </AccordionSummary>
                         <AccordionDetails>
                             <div>
