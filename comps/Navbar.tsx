@@ -32,6 +32,7 @@ const Navbar = () => {
                     </Typography>
                     <Button color="inherit" href="/packages">Paquetes</Button>
                     <Button color="inherit" href="/trucks">Camiones</Button>
+                    <Button color="inherit" href="/routes">Rutas</Button>
                     <Button color="inherit" href="/login">Iniciar sesión</Button>
                 </Toolbar>
             </AppBar>
