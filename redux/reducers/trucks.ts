@@ -10,6 +10,9 @@ export const truckReducer = (state = initState, action: AnyAction) =>{
         case "getTrucks":
             return [...action.payload];
             break;
+        case "createTruck":
+            return [...state,action.payload]
+            break;
         default:
             return state
             break;

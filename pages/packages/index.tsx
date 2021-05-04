@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const client = new ApolloClient({
-    uri: 'http://localhost:4000',
+    uri: 'http://18.209.20.0',
     cache: new InMemoryCache()
 });
 
@@ -473,6 +473,7 @@ export default function packs ({res}) {
                                 name="address"
                                 autoComplete="address"
                                 autoFocus
+                                type="text"
                                 defaultValue={formInfo.address}
                             />
                             <TextField
