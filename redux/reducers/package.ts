@@ -34,7 +34,17 @@ export const packageReducer = (state = initState, action: AnyAction) =>{
 
     switch (action.type) {
         case "getPackages":
-            return state;
+            return [...action.payload];
+            break;
+        case "createPackage":
+            return [...state,action.payload]
+            break;
+        case "updatePackage":
+            let newstate = state.filter(Package => Package.id !== action.payload.id);
+            return [...newstate,action.payload]
+            break;
+        case "removePackage":
+            return state.filter(Package => Package.id !== action.payload);
             break;
         default:
             return state

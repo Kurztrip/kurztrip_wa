@@ -13,6 +13,9 @@ import Grid from "@material-ui/core/Grid";
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import {ApolloClient, gql, InMemoryCache, useMutation} from '@apollo/client';
+import {useSelector, useDispatch} from "react-redux";
+import { useState, useEffect } from 'react';
+import { getPackages, createPackage, removePackage, updatePackage } from "../../redux/actions/package";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -144,6 +147,13 @@ export const getStaticProps = async () => {
 export default function packs ({res}) {
     const classes = useStyles();
 
+    const dispatch = useDispatch()
+    const state = useSelector(state => state)
+
+    useEffect(() => {
+        dispatch(getPackages(res));
+    }, [res]);
+
     const m3 = '\u00B3';
 
     const [openAdd, setOpenAdd] = React.useState(false);
@@ -197,6 +207,15 @@ export default function packs ({res}) {
     const newPackage = async event => {
         event.preventDefault()
 
+        const address= event.target.address.value;
+        const weight= parseFloat(event.target.weight.value);
+        const volume= parseFloat(event.target.volume.value);
+        const latitude= parseFloat(event.target.latitude.value);
+        const longitude= parseFloat(event.target.longitude.value);
+        const storeId= parseInt(event.target.storeId.value);
+        const receiver= event.target.receiver.value;
+        const idReceiver= event.target.idReceiver.value; 
+
         const res = await addPackage({
             variables: {
                 address: event.target.address.value,
@@ -209,6 +228,17 @@ export default function packs ({res}) {
                 idReceiver: event.target.idReceiver.value
             }
         });
+
+        dispatch(createPackage({
+            address: address,
+            weight: weight,
+            volume: volume,
+            latitude: latitude,
+            longitude: longitude,
+            storeId: storeId,
+            receiver: receiver,
+            idReceiver: idReceiver
+        }));
     }
 
     const editPackage = async (event,id) => {
@@ -378,7 +408,7 @@ export default function packs ({res}) {
                 </Accordion>
             </div>
             <div className={classes.root}>
-                {res.map(pack => (
+                {state.packages.map(pack => (
                     <div key={pack.id}>
                         <Accordion key={pack.id}>
                             <AccordionSummary
