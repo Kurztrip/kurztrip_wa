@@ -3,9 +3,10 @@ export const useActionsTypes = {
     getTruck: 'getTruck',
 }
   
-export const getTrucks = () => {
+export const getTrucks = (payload) => {
     return ({
         type: useActionsTypes.getTrucks,
+        payload
     })
 }
 

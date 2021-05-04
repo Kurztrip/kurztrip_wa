@@ -75,9 +75,6 @@ export const getStaticProps = async () => {
 export default function Packages ({data}) {
     const classes = useStyles();
 
-    const dispatch = useDispatch()
-    dispatch(getTrucks())
-
     return (
         <Grid
         container

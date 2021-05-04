@@ -13,6 +13,7 @@ import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import AddCircle from "@material-ui/icons/AddCircle";
+import { useState, useEffect } from 'react';
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -114,6 +115,14 @@ export const getStaticProps = async () => {
 }
 
 export default function Packages ({res}) {
+
+    const dispatch = useDispatch()
+    const state = useSelector(state => state)
+
+    useEffect(() => {
+    dispatch(getTrucks(res));
+    }, [res]);
+
     const classes = useStyles();
 
     const m3 = '\u00B3';
@@ -301,7 +310,7 @@ export default function Packages ({res}) {
                 </Accordion>
             </div>
             <div className={classes.root}>
-                {res.map(truck => (
+                {state.trucks.map(truck => (
                     <Accordion key={truck.id}>
                     <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
