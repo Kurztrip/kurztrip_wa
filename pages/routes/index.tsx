@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export const getStaticProps = async () => {
 
-    const res = await fetch('http://18.209.20.0', {
+    const res = await fetch('http://34.230.18.154/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
