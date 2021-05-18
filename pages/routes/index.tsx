@@ -4,7 +4,8 @@ import {Container, FormHelperText, Grid} from "@material-ui/core";
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import {useSelector, useDispatch} from "react-redux";
-import { getTrucks } from '../../redux/actions/trucks';
+import { useState, useEffect } from 'react';
+import { getRoutes } from '../../redux/actions/route';
 import List from '@material-ui/core/List';
 import ListItem, { ListItemProps } from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -73,6 +74,14 @@ export const getStaticProps = async () => {
 }
 
 export default function Packages ({data}) {
+
+    const dispatch = useDispatch()
+    const state = useSelector(state => state)
+
+    useEffect(() => {
+    dispatch(getRoutes(data));
+    }, [data]);
+
     const classes = useStyles();
 
     return (
@@ -90,7 +99,7 @@ export default function Packages ({data}) {
 
             <div>
             <List>
-                {data.map(route => (
+                {state.routes.map(route => (
                     <Link href={'/routes/' + route.id} key={route.id} >
                     <ListItem>
                         <ListItemText className={classes.heading} primary={'Ruta ' + route.id}/>
