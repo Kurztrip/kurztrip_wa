@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const client = new ApolloClient({
-    uri: 'http://34.230.18.154/',
+    uri: 'http://54.242.133.42/',
     cache: new InMemoryCache()
 });
 
