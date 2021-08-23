@@ -22,7 +22,9 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-, "pages/apollo.config.js"  ],
+,
+    "apollo/apollo.config.js"
+  ],
   "exclude": [
     "node_modules"
   ]

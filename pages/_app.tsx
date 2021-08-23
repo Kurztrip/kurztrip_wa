@@ -3,7 +3,7 @@ import {Provider} from "react-redux"
 import withRedux, { createWrapper } from "next-redux-wrapper"
 import createCache from '@emotion/cache';
 import { ApolloProvider } from "@apollo/client";
-import client from "./apollo.config";
+import client from "../apollo/apollo.config";
 import {store} from "../redux/store"
 import Layout from "../comps/Layout";
 

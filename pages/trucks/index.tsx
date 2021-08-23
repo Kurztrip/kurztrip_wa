@@ -8,7 +8,7 @@ import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import {useSelector, useDispatch} from "react-redux";
 import {createTruck, getTrucks} from '../../redux/actions/trucks';
-import {ApolloClient, gql, InMemoryCache, useMutation} from "@apollo/client";
+import {ApolloClient, createHttpLink, gql, InMemoryCache, useMutation} from "@apollo/client";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
@@ -16,6 +16,7 @@ import AddCircle from "@material-ui/icons/AddCircle";
 import { useState, useEffect } from 'react';
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
+import { useRouter } from "next/router";
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -60,8 +61,18 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const client = new ApolloClient({
-    uri: 'https://api.apps.3.93.103.212.nip.io/',
-    cache: new InMemoryCache()
+    // uri: 'https://api.apps.3.93.103.212.nip.io/',
+    link: createHttpLink({
+        uri: "https://api.apps.3.93.103.212.nip.io/"
+      }),
+
+    cache: new InMemoryCache({ resultCaching: false }),
+  queryDeduplication: false,
+  defaultOptions: {
+    query: {
+      fetchPolicy: "network-only",
+    },
+  },
 });
 
 const ADD_TRUCK = gql `
@@ -116,7 +127,7 @@ const DELETE_TRUCK = gql `
     }
 `;
 
-export const getStaticProps = async () => {
+export const getServerSideProps = async () => {
     const {data} = await client.query({
         query: gql `
         query {
@@ -145,7 +156,10 @@ export default function trucks ({res}) {
 
     const dispatch = useDispatch()
     const state = useSelector((state:{trucks:any}) => state)
-
+    const router = useRouter();
+    const refreshData = () => {
+        router.replace(router.asPath);
+    };
     useEffect(() => {
     dispatch(getTrucks(res));
     }, [res]);
@@ -243,6 +257,7 @@ export default function trucks ({res}) {
             fuel: fuel,
             warehouse: warehouse
         }));
+        refreshData()
     }
 
     const editTruck = async (event,id) => {
@@ -262,6 +277,7 @@ export default function trucks ({res}) {
                 warehouse: parseInt(event.target.warehouse.value)
             }
         });
+        refreshData()
     }
 
     const deleteTruck = async (event, id) => {
@@ -272,6 +288,7 @@ export default function trucks ({res}) {
                 id: parseInt(id)
             }
         });
+        refreshData()
     }
 
     return (

@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-export const getStaticProps = async () => {
+export const getServerSideProps = async () => {
 
     const res = await fetch("https://api.apps.3.93.103.212.nip.io/", {
         method: 'POST',
