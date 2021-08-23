@@ -5,5 +5,7 @@ export interface Package {
     latitude: number;
     volume: number;
     weight: number;
-    store_id: number;
+    storeId: number;
+    receiver: string;
+    idReceiver: number; 
 }

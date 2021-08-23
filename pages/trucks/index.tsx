@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const client = new ApolloClient({
-    uri: 'http://34.230.18.154/',
+    uri: 'https://api.apps.3.93.103.212.nip.io/',
     cache: new InMemoryCache()
 });
 
@@ -144,7 +144,7 @@ export const getStaticProps = async () => {
 export default function trucks ({res}) {
 
     const dispatch = useDispatch()
-    const state = useSelector(state => state)
+    const state = useSelector((state:{trucks:any}) => state)
 
     useEffect(() => {
     dispatch(getTrucks(res));

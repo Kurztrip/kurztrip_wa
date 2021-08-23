@@ -7,7 +7,7 @@ import {
 
 export function makeApolloClient({ token }: any): ApolloClient<NormalizedCacheObject> {
     const link = createHttpLink({
-        uri: `http://localhost:400/graphiql`,
+        uri: `https://api.apps.3.93.103.212.nip.io`,
     });
     const cache = new InMemoryCache()
     const client = new ApolloClient({

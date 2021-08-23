@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export const getStaticProps = async () => {
 
-    const res = await fetch('http://34.230.18.154/', {
+    const res = await fetch("https://api.apps.3.93.103.212.nip.io/", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export const getStaticProps = async () => {
 export default function Packages ({data}) {
 
     const dispatch = useDispatch()
-    const state = useSelector(state => state)
+    const state = useSelector((state:{route:any}) => state)
 
     useEffect(() => {
     dispatch(getRoutes(data));
@@ -99,7 +99,7 @@ export default function Packages ({data}) {
 
             <div>
             <List>
-                {state.routes.map(route => (
+                {state.route.map(route => (
                     <Link href={'/routes/' + route.id} key={route.id} >
                     <ListItem>
                         <ListItemText className={classes.heading} primary={'Ruta ' + route.id}/>

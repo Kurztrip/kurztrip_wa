@@ -36,7 +36,7 @@ const defaultCenter = { lat: 40.748817, lng: -73.985428 };
 
 const defaultOptions = { scrollwheel: false };
 
-const RegularMap = withScriptjs(
+const RegularMap: any = withScriptjs(
   withGoogleMap(props => (
     <GoogleMap
       defaultZoom={8}

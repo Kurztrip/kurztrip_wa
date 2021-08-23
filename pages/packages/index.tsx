@@ -16,6 +16,7 @@ import {ApolloClient, gql, InMemoryCache, useMutation} from '@apollo/client';
 import {useSelector, useDispatch} from "react-redux";
 import { useState, useEffect } from 'react';
 import { getPackages, createPackage, removePackage, updatePackage } from "../../redux/actions/package";
+import { Package } from '../../redux/types/Package';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -60,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const client = new ApolloClient({
-    uri: 'http://34.230.18.154/',
+    uri: 'https://api.apps.3.93.103.212.nip.io/',
     cache: new InMemoryCache()
 });
 
@@ -148,7 +149,7 @@ export default function packs ({res}) {
     const classes = useStyles();
 
     const dispatch = useDispatch()
-    const state = useSelector(state => state)
+    const state = useSelector((state:{packages:Package[]}) => state.packages)
 
     useEffect(() => {
         dispatch(getPackages(res));
@@ -228,8 +229,9 @@ export default function packs ({res}) {
                 idReceiver: event.target.idReceiver.value
             }
         });
-
+        console.log(res)
         dispatch(createPackage({
+            id:res.data.createPackage.id,
             address: address,
             weight: weight,
             volume: volume,
@@ -408,13 +410,13 @@ export default function packs ({res}) {
                 </Accordion>
             </div>
             <div className={classes.root}>
-                {state.packages.map(pack => (
+                {state.map(pack => (
                     <div key={pack.id}>
                         <Accordion key={pack.id}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
-                                aria-controls={pack.id}
-                                id={pack.id}
+                                aria-controls={pack.id.toString()}
+                                id={pack.id.toString()}
                             >
                                 <Container>
                                     <Box height='6vh'>

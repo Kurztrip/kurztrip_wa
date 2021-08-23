@@ -8,7 +8,9 @@ const initState: Package[] = [{
     latitude: 1,
     volume: 1,
     weight: 1,
-    store_id: 1,
+    storeId: 1,
+    receiver: 'string',
+    idReceiver: 1,  
 },
 {
     id: 2,
@@ -17,7 +19,9 @@ const initState: Package[] = [{
     latitude: 4353451,
     volume: 165682,
     weight: 115325,
-    store_id: 1,
+    storeId: 1,
+    receiver: 'string',
+    idReceiver: 1, 
 },
 {
     id: 3,
@@ -26,7 +30,9 @@ const initState: Package[] = [{
     latitude: 435344232451,
     volume: 165688999882,
     weight: 115325389111454,
-    store_id: 2,
+    storeId: 2,
+    receiver: 'string',
+    idReceiver: 1,  
 },
 ]
 
