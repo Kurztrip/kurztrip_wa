@@ -87,7 +87,7 @@ const client = new ApolloClient({
     }),
 //   uri: "https://api.apps.3.93.103.212.nip.io/",
     cache: new InMemoryCache({ resultCaching: false }),
-    queryDeduplication: false,
+    // queryDeduplication: false,
     defaultOptions: {
         query: {
             fetchPolicy: "network-only",
@@ -177,8 +177,8 @@ const DELETE_PACKAGE = gql`
 async function getAllPackages() {
     return await client.query({
         query: gql`
-      query {
-        getPackages {
+      query getAllp($token:String!){          
+        getPackages(token:$token) {
           id
           address
           weight
@@ -192,12 +192,17 @@ async function getAllPackages() {
       }
     `,
         fetchPolicy: "network-only",
+        variables:{
+            token:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNydmFyZ2Fzb0B1bmFsLmVkdS5jbyIsInJvbCI6IkNvbmR1Y3RvciIsIm5hbWUiOiJTYW50aWFnbyIsImxhc3ROYW1lIjoiVmFyZ2FzIiwiY2VsbHBob25lIjoiMzI4NTY3NDE5NiIsImlkIjoiNjEyNGI5NDBhNTBjMTUxMzVlMWRiNDQyIiwiaWF0IjoxNjI5Nzk5MjUyLCJleHAiOjE2Mjk4MzUyNTJ9.7kRoRx3A3QxA8jjNkToeyWo4A4WmGBGIxqyNsyBxakU"
+        }
     });
 }
-export const getServerSideProps = async () => {
+export const getServerSideProps = async (context) => {
     var myRes = await getAllPackages();
+    const {slice} = context.query;
+    const page = parseInt(slice.toString());
     return {
-        props: { res: myRes.data.getPackages },
+        props: { res: myRes.data.getPackages.slice(50*page, Math.min(50*(page+1),myRes.data.getPackages.length)) },
     };
 };
 
@@ -484,7 +489,7 @@ export default function packs({ res }) {
                 </Accordion>
             </div>
             <div className={classes.root}>
-                {state.slice(50*page, Math.min(50*(page+1),state.length)).map((pack) => (
+                {state.map((pack) => (
                     <div key={pack.id}>
                         <Accordion key={pack.id}>
                             <AccordionSummary
